@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Sango.DirectorySyncService": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\Sango\\Downloads\\test\\source\r\nC:\\Users\\Sango\\Downloads\\test\\dest"
+    }
+  }
+}
