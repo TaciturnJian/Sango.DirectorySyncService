@@ -12,3 +12,15 @@ public static class EnumerableTriggerExtension
         foreach (var trigger in triggers) trigger.Check();
     }
 }
+
+public static class TriggerExtension
+{
+    public static void RepeatCheck(this ITriggerCheck trigger, TimeSpan delay, ref readonly ulong stop)
+    {
+        while (Interlocked.Read(in stop) == 0)
+        {
+            trigger.Check();
+            Thread.Sleep(delay);
+        }
+    }
+}
