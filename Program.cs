@@ -1,6 +1,7 @@
-﻿using Fleck;
+﻿using System.Collections.Immutable;
+using Fleck;
 using Sango.DirectorySyncService;
-using System.Collections.Immutable;
+using Timer = System.Timers.Timer;
 
 if (args.Length < 2)
 {
@@ -15,10 +16,7 @@ var destinations = args.Skip(1).ToImmutableList();
 FleckLog.Info("Main> 同步参数如下：");
 FleckLog.Info($"Main> [源]({source})");
 var temp_index = 1;
-foreach (var destination in destinations)
-{
-    FleckLog.Info($"Main> [目的地][{temp_index++}]({destination})");
-}
+foreach (var destination in destinations) FleckLog.Info($"Main> [目的地][{temp_index++}]({destination})");
 
 ulong user_stop = 0;
 
@@ -35,26 +33,28 @@ Console.ReadLine();
 var syncer = new DirectorySyncer(source, destinations);
 
 while (Interlocked.Read(ref user_stop) == 0)
-{
     try
     {
-        var timer = new System.Timers.Timer(TimeSpan.FromSeconds(1));
+        using var timer = new Timer(TimeSpan.FromSeconds(1));
         timer.Elapsed += (_, _) => syncer.Check();
         timer.AutoReset = true;
 
         FleckLog.Info("Main> 同步服务开始运行");
         timer.Start();
+
         while (true)
         {
             var stop = Interlocked.Read(ref user_stop) != 0;
             if (stop) break;
         }
+
         timer.Stop();
     }
     catch (Exception e)
     {
         FleckLog.Error($"Main> 出现异常：{e}");
     }
-}
+
+FleckLog.Info("Main> 同步服务已停止");
 
 return 0;

@@ -14,11 +14,9 @@ public class FileSyncer(string filePath) : ITriggerCheck
     public bool IsExistsInLastCheck;
     public DateTime LastWriteTime = DateTime.MinValue;
 
-    public string FilePath { get; } = filePath;
+    public string FilePath => filePath;
 
     public string SourceName => Path.GetFileName(FilePath);
-
-    public event EventHandler<FileChangeArgs>? WhenFileChanged;
 
     public void Check()
     {
@@ -45,7 +43,9 @@ public class FileSyncer(string filePath) : ITriggerCheck
         WhenFileChanged?.Invoke(this, new FileChangeArgs(ChangeType.Modified, FilePath));
     }
 
-    public void AddDestinationDirectory(string destination)
+    public event EventHandler<FileChangeArgs>? WhenFileChanged;
+
+    public void AddDestination(string destination)
     {
         if (!Directory.Exists(destination))
         {
@@ -78,6 +78,11 @@ public class FileSyncer(string filePath) : ITriggerCheck
                     throw new ArgumentOutOfRangeException(nameof(args));
             }
         };
+    }
+
+    public void AddDestinations(IEnumerable<string> destinations)
+    {
+        foreach (var dest in destinations) AddDestination(dest);
     }
 
     public readonly record struct FileChangeArgs(ChangeType Change, string FilePath);
